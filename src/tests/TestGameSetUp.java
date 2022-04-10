@@ -1,13 +1,15 @@
 package tests;
 
-import game.*;
-import game.GameEngine.GameMode;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import game.GUI;
+import game.GameEngine;
 
 class TestGameSetUp {
 	GUI gui;
@@ -16,7 +18,7 @@ class TestGameSetUp {
 	@BeforeEach
 	void setUp() throws Exception {
 		gui = new GUI();
-		game = new GameEngine(8, GameMode.SIMPLEGAME);
+		game = new GameEngine(8);
 	}
 
 	@AfterEach
@@ -33,7 +35,7 @@ class TestGameSetUp {
 		assertFalse(gui.checkValidBoardSize("2"));
 	}
 	
-	@Test
+	@Test //AC 3.1
 	void testValidInput() {
 		assertTrue(gui.checkValidBoardSize("3"));
 	}
@@ -50,14 +52,5 @@ class TestGameSetUp {
 		gui.setBoardSizeTextField("1");
 		gui.newGame();
 		assertEquals("Board Size Must Be 3 Or Greater.", gui.getStatus());
-	}
-	
-	@Test //AC 3.1
-	void testClearBoard() {
-		game.makeMove(0, 0, 'S');
-		game.makeMove(1, 1, 'O');
-		game.makeMove(3, 0, 'S');
-		game.resetGame(6, GameMode.SIMPLEGAME);		
-		assertTrue(game.boardEmpty());
 	}
 }

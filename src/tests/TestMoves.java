@@ -1,6 +1,6 @@
 package tests;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,14 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import game.GameEngine;
 import game.GameEngine.Players;
-import game.GameEngine.GameMode;
 
 class TestMoves {
 	GameEngine game;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		game = new GameEngine( 4, GameMode.SIMPLEGAME);
+		game = new GameEngine(4);
 	}
 
 	@AfterEach
@@ -36,9 +35,9 @@ class TestMoves {
 	
 	@Test //AC 8.1 
 	void testSwitchTurn() {
-		game.setPlayerTurn(Players.BLUEPLAYER);
+		game.setPlayerTurn(Players.BLUEHUMAN);
 		game.switchTurn();
-		assertEquals(Players.REDPLAYER, game.getPlayerTurn());
+		assertEquals(Players.REDHUMAN, game.getPlayerTurn());
 	}
 	
 	@Test //AC 4.2 & 6.2
@@ -53,18 +52,5 @@ class TestMoves {
 		game.makeMove(1, 1, 'S');
 		game.makeMove(1, 1, 'O');
 		assertEquals('S', game.getCell(1, 1));
-	}
-	
-	@Test //AC 6.3
-	void testSOSTracking() {
-		game.makeMove(0, 0, 'S');
-		game.makeMove(0, 1, 'O');
-		game.makeMove(0, 2, 'S');
-		assertEquals(0, game.getSosCoordinate(0,0));
-		assertEquals(2, game.getSosCoordinate(0,1));
-		assertEquals(0, game.getSosCoordinate(0,2));
-		assertEquals(0, game.getSosCoordinate(0,3));
-		assertEquals(Players.BLUEPLAYER, game.getSosMadeBy(0));
-		
 	}
 }

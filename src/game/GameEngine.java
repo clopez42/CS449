@@ -1,120 +1,85 @@
 package game;
 
+import java.util.Random;
+
+import game.GameEngine.Players;
+
 public class GameEngine {
-	private int bluePlayerScore, redPlayerScore;
-	private char[][] board;
 	private int[][] sosCoordinates;
 	private Players[] sosMadeBy;
-	private int row1, col1, row2, col2;
-	
-	public enum GameMode{
-		SIMPLEGAME, GENERALGAME
-	}
+	private int bluePlayerScore, redPlayerScore;
+	protected char[][] board;
+	private Random rand = new Random();
 	
 	public enum GameState{
 		PLAYING, BLUEWINNER, REDWINNER, TIEGAME, REPLAY
 	}
 	public static enum Players {
-		BLUEPLAYER, REDPLAYER
+		BLUEHUMAN, REDHUMAN, BLUECOMPUTER, REDCOMPUTER
 	}
 	
-	GameMode gameMode;
 	GameState gameState;
 	Players playerTurn;
+	Players bluePlayer;
+	Players redPlayer;
 	
-	public GameEngine(int boardSize, GameMode mode) {
-		initGame(boardSize, mode);
+	public GameEngine(int boardSize) {
+		initGame(boardSize);
 	}
 	
-	public void initGame(int boardSize, GameMode mode) {
-		setBoard(boardSize);
-		setGameMode(mode);
-		setGameState(GameState.PLAYING);
+	public void initGame(int boardSize) {
+		board = new char[boardSize][boardSize];
+		sosCoordinates = new int[boardSize*boardSize][4];
+		sosMadeBy = new Players[boardSize*boardSize];
 		bluePlayerScore = 0;
 		redPlayerScore = 0;
-		setPlayerTurn(Players.BLUEPLAYER);
 		
-		if(boardEmpty() == false) {
-			System.out.println("Board is not empty");
-		}
+		setBlueHumanComputerToggle(Players.BLUEHUMAN);
+		setRedHumanComputerToggle(Players.REDHUMAN);
+		playerTurn = bluePlayer;
+		
+		setGameState(GameState.PLAYING);
+		setPlayerTurn(bluePlayer);
 	}
 
 	public void makeMove(int row, int col, char letter) {				
 		if((board[row][col] != 'S') && (board[row][col] != 'O')) {
 			board[row][col] = letter;
-			if(gameMode == GameMode.SIMPLEGAME) {
-				simpleGameMode(row, col);
-			}else if(gameMode == GameMode.GENERALGAME) {
-				generalGameMode(row, col);				
-			}
-		}
-	}
-	
-	public void simpleGameMode(int row, int col) {
-		if(checkSOSFormed(row, col)) {
-			setSosCoordinates(row1, col1, row2, col2);
-			setSosMadeBy(getPlayerTurn());
-			if(playerTurn == Players.BLUEPLAYER) {
-				gameState = GameState.BLUEWINNER;
-			}else if(playerTurn == Players.REDPLAYER) {
-				gameState = GameState.REDWINNER;
-			}
-		}else if(!checkSOSFormed(row, col)) {
-			if(boardFull()) {
-				gameState = GameState.TIEGAME;
-			}else {
-				switchTurn();
-			}
-		}
-	}
-	
-	public void generalGameMode(int row, int col) {
-		if(checkSOSFormed(row, col)) {
-			setSosCoordinates(row1, col1, row2, col2);
-			setSosMadeBy(getPlayerTurn());
-			if(playerTurn == Players.BLUEPLAYER) {
-				increaseBluePlayerScore();
-			}else if(playerTurn == Players.REDPLAYER) {
-				increaseRedPlayerScore();
-			}
-		}else if(checkSOSFormed(row, col) == false) {
-			switchTurn();
-		}
-		
-		if(boardFull()) {
-			if(getBluePlayerScore() > getRedPlayerScore()) {
-				gameState = GameState.BLUEWINNER;
-			}else if(getRedPlayerScore() > getBluePlayerScore()) {
-				gameState = GameState.REDWINNER;
-			}else if(getBluePlayerScore() == getRedPlayerScore()) {
-				gameState = GameState.TIEGAME;
-			}
 		}
 	}
 	
 	public void switchTurn() {
-		if(playerTurn == Players.BLUEPLAYER) {
-			playerTurn = Players.REDPLAYER;
+		if(playerTurn == bluePlayer) {
+			playerTurn = redPlayer;
 		}else {
-			playerTurn = Players.BLUEPLAYER;
+			playerTurn = bluePlayer;
 		}
 	}
 	
-	public void resetGame(int boardSize, GameMode mode) {
-		initGame(boardSize, mode);
+	public void computerAutoPlay() {
+		int target = rand.nextInt(getNumberOfEmptyCells());
+		int index = 0;
+		
+		for (int i = 0; i < getBoardSize(); i++) {
+			for (int j = 0; j < getBoardSize(); j++) {
+				if ((getCell(i,j) != 'S') && (getCell(i,j) != 'O')) {
+					if (target == index) {
+						makeMove(i, j, getAutoPlayLetter());
+						return;
+					} else {
+						index++;
+					}
+				}
+			}
+		}
 	}
 	
-	public void setBoard(int size) {
-		board = null;
-		sosCoordinates = null;
-		sosMadeBy = null;
-		board = new char[size][size];
-		sosCoordinates = new int[size*size/3][4];
-		sosMadeBy = new Players[size*size/3];
-	}
-	
-	public void setGameMode(GameMode mode) {
-		gameMode = mode;
+	public void computerMove() {
+		if(getGameState() == GameState.PLAYING) {
+			
+			System.out.println("in comp vs comp");
+			computerAutoPlay();
+		}
 	}
 	
 	public void setPlayerTurn(Players player) {
@@ -137,9 +102,21 @@ public class GameEngine {
 	public void setSosMadeBy(Players player) {
 		sosMadeBy[getBluePlayerScore()+getRedPlayerScore()] = player;
 	}
-
-	public GameMode getGameMode() {
-		return gameMode;
+	
+	public void setBlueHumanComputerToggle(Players mode) {
+		bluePlayer = mode;
+		if((playerTurn == Players.BLUEHUMAN) && (bluePlayer == Players.BLUECOMPUTER)) {
+			playerTurn = bluePlayer;
+			computerAutoPlay();
+		}		
+	}
+	
+	public void setRedHumanComputerToggle(Players mode) {
+		redPlayer = mode;
+		if((playerTurn == Players.REDHUMAN) && (redPlayer == Players.REDCOMPUTER)) {
+			playerTurn = redPlayer;
+			computerAutoPlay();
+		}
 	}
 	
 	public GameState getGameState() {
@@ -178,6 +155,46 @@ public class GameEngine {
 		return sosMadeBy[i];
 	}
 	
+	public Players getBluePlayer() {
+		return bluePlayer;
+	}
+	
+	public Players getRedPlayer() {
+		return redPlayer;
+	}
+	
+	public char getAutoPlayLetter() {
+		int coin = rand.nextInt(2);
+    	
+    	if(coin == 0) {
+    		return 'S';
+    	}else if(coin == 1){
+    		return 'O';
+    	}else {
+    		return 'S';
+    	}
+	}
+	
+	private int getNumberOfEmptyCells() {
+		int numberOfEmptyCells = 0;
+		for (int i = 0; i < getBoardSize(); i++) {
+			for (int j = 0; j < getBoardSize(); j++) {
+				if ((getCell(i,j) != 'S') && (getCell(i,j) != 'O')) {
+					numberOfEmptyCells++;
+				}
+			}
+		}
+		return numberOfEmptyCells;
+	}
+	
+	public void increaseScore() {
+		if(getPlayerTurn() == Players.BLUEHUMAN) {
+			bluePlayerScore++;
+		}else if(getPlayerTurn() == Players.REDHUMAN) {
+			redPlayerScore++;
+		}
+	}
+	
 	public void increaseBluePlayerScore() {
 		bluePlayerScore++;
 	}
@@ -186,7 +203,25 @@ public class GameEngine {
 		redPlayerScore++;
 	}
 	
-	public boolean boardEmpty() {
+	public boolean checkFullAutoPlay() {
+		if((bluePlayer == Players.BLUECOMPUTER) && (redPlayer == Players.REDCOMPUTER)) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public boolean checkPartialAutoPlay() {
+		if((bluePlayer == Players.BLUEHUMAN) && (redPlayer == Players.REDCOMPUTER) && (playerTurn == redPlayer)) {
+			return true;
+		}else if((bluePlayer == Players.BLUECOMPUTER) && (redPlayer == Players.REDHUMAN) && (playerTurn == bluePlayer)) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public boolean checkBoardEmpty() {
 		for(int i = 0; i<board.length; i++) {
 			for(int j = 0; j<board.length; j++) {
 				if((board[i][j] == 'S') || (board[i][j] == 'O')) {
@@ -199,21 +234,29 @@ public class GameEngine {
 		return false;
 	}
 	
-	public boolean boardFull() {
+	public boolean checkBoardFull() {
+		int count = 0;
+		int target = getBoardSize() * getBoardSize();
 		for(int i = 0; i<board.length; i++) {
-			for(int j = 0; j<board.length; j++) {
-				if(!(board[i][j] == 'S') && !(board[i][j] == 'O')) {
-					return false;
+			for(int j = 0; j<board.length; j++) {				
+				if((board[i][j] == 'S') || (board[i][j] == 'O')) {
+					count++;
 				}
 			}
 		}
-		return true;
+		if(count == target) {
+			return true;
+		}else {
+			return false;
+		}
+		
 	}
 	
 	public boolean checkSOSFormed(int row, int col) {
 		char initChar = board[row][col];
 		char nextChar = ' ';
 		char finalChar = 'S';
+		boolean sosMade = false;
 		
 		if(initChar == 'S') {
 			nextChar = 'O';
@@ -222,74 +265,84 @@ public class GameEngine {
 		}
 		
 		if(initChar == 'S') {
-			row1 = row;
-			col1 = col;
 			for(int i = row - 1; i <= row + 1; i++) {
 				for(int j = col - 1; j <= col + 1; j++) {					
 					if((i >= 0) && (j >= 0) && (i < board.length) && (j < board.length) && (board[i][j] == nextChar)) {						
 						if((i<row) && (j<col) && (i-1 >= 0) && (j-1 >= 0) && (board[i-1][j-1] == finalChar)) {
-							row2 = i-1;
-							col2 = j-1;
-							return true;
+							setSosCoordinates(row, col, i-1, j-1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i<row) && (j==col) && (i-1 >= 0) && (board[i-1][j] == finalChar)) {
-							row2 = i-1;
-							col2 = j;
-							return true;
-						}else if((i<row) && (j>col) && (i-1 >= 0) && (j+1 < board.length) && (board[i+1][j+1] == finalChar)) {
-							row2 = i+1;
-							col2 = j+1;
-							return true;
+							setSosCoordinates(row, col, i-1, j);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
+						}else if((i<row) && (j>col) && (i-1 >= 0) && (j+1 < board.length) && (board[i-1][j+1] == finalChar)) {
+							setSosCoordinates(row, col, i-1, j+1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i==row) && (j<col) && (j-1 >= 0) && (board[i][j-1] == finalChar)) {
-							row2 = i;
-							col2 = j-1;
-							return true;
+							setSosCoordinates(row, col, i, j-1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i==row) && (j>col) && (j+1 < board.length) && (board[i][j+1] == finalChar)) {
-							row2 = i-1;
-							col2 = j-1;
-							return true;
+							setSosCoordinates(row, col, i, j+1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i>row) && (j<col) && (i+1 < board.length) && (j-1 >= 0) && (board[i+1][j-1] == finalChar)) {
-							row2 = i+1;
-							col2 = j-1;
-							return true;
+							setSosCoordinates(row, col, i+1, j-1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i>row) && (j==col) && (i+1 < board.length) && (board[i+1][j] == finalChar)) {
-							row2 = i+1;
-							col2 = j;
-							return true;
+							setSosCoordinates(row, col, i+1, j);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i>row) && (j>col) && (i+1 < board.length) && (j+1 < board.length) && (board[i+1][j+1] == finalChar)) {
-							row2 = i+1;
-							col2 = j+1;
-							return true;
+							setSosCoordinates(row, col, i+1, j+1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}
 					}
 				}
 			}
+			return sosMade;
 		}else if(initChar == 'O') {
 			for(int i = row - 1; i <= row + 1; i++) {
 				for(int j = col - 1; j <= col + 1; j++) {
 					if((i >= 0) && (j >= 0) && (i < board.length) && (j < board.length) && (board[i][j] == nextChar)) {
-						row1 = i;
-						col1 = j;
 						if((i<row) && (j<col) && (row+1 < board.length) && (col+1 < board.length) && (board[row+1][col+1] == finalChar)) {
-							row2 = row+1;
-							col2 = col+1;
-							return true;
+							setSosCoordinates(i, j, row+1, col+1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i<row) && (j==col) && (row+1 < board.length) && (board[row+1][col] == finalChar)) {
-							row2 = row+1;
-							col2 = col;
-							return true;
+							setSosCoordinates(i, j, row+1, col);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i<row) && (j>col) && (row+1 < board.length) && (col-1 >= 0) && (board[row+1][col-1] == finalChar)) {
-							row2 = row+1;
-							col2 = col-1;
-							return true;
+							setSosCoordinates(i, j, row+1, col-1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}else if((i==row) && (j<col) && (col+1 < board.length) && (board[row][col+1] == finalChar)) {
-							row2 = row;
-							col2 = col+1;
-							return true;
+							setSosCoordinates(i, j, row, col+1);
+							setSosMadeBy(getPlayerTurn());
+							increaseScore();
+							sosMade = true;
 						}							
 					}
 				}
 			}
+			return sosMade;
 		}
-		return false;
+		return sosMade;
 	}
 }

@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import game.GUI;
 import game.GameEngine;
-import game.GameEngine.GameMode;
 import game.GameEngine.Players;
 import game.GameEngine.GameState;
+import game.SimpleGame;
 
 class TestSimpleGame {
 	GameEngine game;
@@ -18,23 +18,11 @@ class TestSimpleGame {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		game = new GameEngine(3, GameMode.SIMPLEGAME);
+		game = new SimpleGame(3);
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
-	}
-
-	@Test //AC 2.1
-	void testSimpleGameMode() {
-		assertEquals(game.getGameMode(), GameMode.SIMPLEGAME);
-	}
-	
-	@Test //AC 2.1
-	void testSimpleGameModeOnGUI() {
-		gui = new GUI();
-		gui.setGameModeButton(GameMode.SIMPLEGAME);
-		assertEquals(gui.getGameMode(), GameMode.SIMPLEGAME);
 	}
 
 	@Test //AC 5.1
@@ -56,7 +44,7 @@ class TestSimpleGame {
 		game.makeMove(2, 0, 'S');
 		game.makeMove(2, 1, 'S');
 		game.makeMove(2, 2, 'S');
-		assertTrue(game.boardFull());
+		assertTrue(game.checkBoardFull());
 		assertEquals(GameState.TIEGAME, game.getGameState());
 	}
 }
