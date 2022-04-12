@@ -76,8 +76,6 @@ public class GameEngine {
 	
 	public void computerMove() {
 		if(getGameState() == GameState.PLAYING) {
-			
-			System.out.println("in comp vs comp");
 			computerAutoPlay();
 		}
 	}
@@ -188,9 +186,9 @@ public class GameEngine {
 	}
 	
 	public void increaseScore() {
-		if(getPlayerTurn() == Players.BLUEHUMAN) {
+		if((getPlayerTurn() == Players.BLUEHUMAN) || (getPlayerTurn() == Players.BLUECOMPUTER)) {
 			bluePlayerScore++;
-		}else if(getPlayerTurn() == Players.REDHUMAN) {
+		}else if((getPlayerTurn() == Players.REDHUMAN) || (getPlayerTurn() == Players.REDCOMPUTER)) {
 			redPlayerScore++;
 		}
 	}

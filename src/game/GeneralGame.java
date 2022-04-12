@@ -5,7 +5,6 @@ import game.GameEngine.Players;
 public class GeneralGame extends GameEngine{
 	public GeneralGame(int boardSize) {
 		super(boardSize);
-		
 	}
 	
 	@Override

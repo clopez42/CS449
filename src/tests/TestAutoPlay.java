@@ -59,5 +59,4 @@ class TestAutoPlay {
 		game.makeMove(1,2,'S');
 		assertEquals(Players.BLUEHUMAN, game.getPlayerTurn());
 	}
-
 }

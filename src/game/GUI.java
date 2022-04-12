@@ -190,7 +190,7 @@ public class GUI extends JFrame{
 		if(game.checkFullAutoPlay() == true) {
 			game.computerMove();
 			try {
-				Thread.sleep(500);
+				Thread.sleep(150);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -203,7 +203,7 @@ public class GUI extends JFrame{
 		if(game.checkPartialAutoPlay() == true) {
 			game.computerMove();
 			try {
-				Thread.sleep(500);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -280,10 +280,10 @@ public class GUI extends JFrame{
 				}
 			}
 			
-			for(int i = 0; i < game.getCombinedScore(); i++) {
-				if(game.getSosMadeBy(i) == Players.BLUEHUMAN) {
+			for(int i = 0; i < game.getCombinedScore(); i++) {				
+				if((game.getSosMadeBy(i) == Players.BLUEHUMAN) || (game.getSosMadeBy(i) == Players.BLUECOMPUTER)) {
 					g2d.setColor(Color.BLUE);
-				}else if(game.getSosMadeBy(i) == Players.REDHUMAN) {
+				}else if((game.getSosMadeBy(i) == Players.REDHUMAN) || (game.getSosMadeBy(i) == Players.REDCOMPUTER)) {
 					g2d.setColor(Color.RED);
 				}
 				

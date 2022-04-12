@@ -14,7 +14,7 @@ public class SimpleGame extends GameEngine{
 			board[row][col] = letter;
 			
 			if(checkSOSFormed(row, col)) {
-				System.out.println("sos made");
+				//System.out.println("sos made");
 				if((playerTurn == Players.BLUEHUMAN) || (playerTurn == Players.BLUECOMPUTER)) {
 					gameState = GameState.BLUEWINNER;
 				}else if((playerTurn == Players.REDHUMAN) || (playerTurn == Players.REDCOMPUTER)) {
@@ -28,5 +28,9 @@ public class SimpleGame extends GameEngine{
 				}
 			}
 		}
+		
+		
+		
+		//System.out.println(getSosCoordinate(0,0) + ", " +  getSosCoordinate(0,1) + ", " + getSosCoordinate(0,2) + ", " + getSosCoordinate(0,3));
 	}
 }
