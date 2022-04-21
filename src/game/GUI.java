@@ -26,14 +26,13 @@ public class GUI extends JFrame{
     private JPanel westPanel = new JPanel();
     
     private JTextField boardSizeField = new JTextField(2);
-    
 	private JLabel boardSizeLabel = new JLabel ("Board Size");
 	private JLabel statusBar = new JLabel("Status");
 	private JLabel bluePlayerLbl = new JLabel("Blue player");
     private JLabel redPlayerLbl = new JLabel("Red player");
     
     private JButton newGameButton = new JButton("New Game");
-	
+    private final JButton replayButton = new JButton("Replay");
     private static JRadioButton simpleGameButton = new JRadioButton("Simple Game");
     private static JRadioButton generalGameButton = new JRadioButton("General Game");
     private JRadioButton redSButton = new JRadioButton("S");
@@ -44,6 +43,7 @@ public class GUI extends JFrame{
     private JRadioButton redHumanButton = new JRadioButton("Human");
     private JRadioButton redComputerButton = new JRadioButton("Computer");
     private JRadioButton blueComputerButton = new JRadioButton("Computer");
+    private JCheckBox recordCheckBox = new JCheckBox("Record Game");
     
     private GameEngine game;
 	
@@ -65,35 +65,57 @@ public class GUI extends JFrame{
 	}
 	
 	private void setContentPane() {
-		
+		northPanel.add(Box.createHorizontalStrut(375));
 		northPanel.add(simpleGameButton);
 		northPanel.add(generalGameButton);
+		northPanel.add(Box.createHorizontalStrut(325));
 		northPanel.add(boardSizeLabel);
 		northPanel.add(boardSizeField);
 		
+		southPanel.add(recordCheckBox);
+		southPanel.add(Box.createHorizontalStrut(350));
+		statusBar.setHorizontalAlignment(SwingConstants.CENTER);
 		southPanel.add(statusBar);
+		southPanel.add(Box.createHorizontalStrut(350));
+		newGameButton.setHorizontalAlignment(SwingConstants.RIGHT);
 		southPanel.add(newGameButton);
 		
 		eastPanel.setLayout(new BoxLayout(eastPanel, BoxLayout.Y_AXIS));
-		eastPanel.add(Box.createVerticalStrut(100));
+		eastPanel.setPreferredSize(new Dimension(150, GAME_BOARD_SIZE));		
+		eastPanel.add(Box.createVerticalStrut(150));
+		redPlayerLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 		eastPanel.add(redPlayerLbl);
 		eastPanel.add(Box.createVerticalStrut(10));
+		redHumanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		eastPanel.add(redHumanButton);
 		eastPanel.add(Box.createVerticalStrut(3));
+		redSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		eastPanel.add(redSButton);
+		redSButton.addActionListener(new RedSButtonListener());
+		redOButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		eastPanel.add(redOButton);
 		eastPanel.add(Box.createVerticalStrut(15));
+		redComputerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		eastPanel.add(redComputerButton);
+		eastPanel.add(Box.createVerticalStrut(480));
+		replayButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		eastPanel.add(replayButton);
 		
 		westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
-		westPanel.add(Box.createVerticalStrut(100));
+		westPanel.setPreferredSize(new Dimension(150, GAME_BOARD_SIZE));	
+		westPanel.add(Box.createVerticalStrut(150));
+		bluePlayerLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 		westPanel.add(bluePlayerLbl);
 		westPanel.add(Box.createVerticalStrut(10));
+		blueHumanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		westPanel.add(blueHumanButton);
 		westPanel.add(Box.createVerticalStrut(3));
+		blueSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		westPanel.add(blueSButton);
+		blueOButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		westPanel.add(blueOButton);
 		westPanel.add(Box.createVerticalStrut(15));
+		blueComputerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		westPanel.add(blueComputerButton);
 		
 		gameBoardCanvas = new GameBoardCanvas();
@@ -109,7 +131,6 @@ public class GUI extends JFrame{
 		simpleGameButton.addActionListener(new SimpleGameButtonListener());
         generalGameButton.addActionListener(new GeneralGameButtonListener());
         newGameButton.addActionListener(new NewGameButtonListener());
-        redSButton.addActionListener(new RedSButtonListener());
         redOButton.addActionListener(new RedOButtonListener());
         blueSButton.addActionListener(new BlueSButtonListener());
         blueOButton.addActionListener(new BlueOButtonListener());
@@ -117,6 +138,8 @@ public class GUI extends JFrame{
         blueComputerButton.addActionListener(new BlueComputerButtonListener());
         redHumanButton.addActionListener(new RedHumanButtonListener());
         redComputerButton.addActionListener(new RedComputerButtonListener());
+        recordCheckBox.addActionListener(new RecordListener());
+        replayButton.addActionListener(new ReplayListener());
 	}
 
 	public boolean checkValidBoardSize(String input) {
@@ -148,6 +171,7 @@ public class GUI extends JFrame{
 		redHumanButton.doClick();
 		blueSButton.doClick();
 		redSButton.doClick();
+		replayButton.setEnabled(false);
 		
 		try {
 			Thread.sleep(500);
@@ -190,7 +214,7 @@ public class GUI extends JFrame{
 		if(game.checkFullAutoPlay() == true) {
 			game.computerMove();
 			try {
-				Thread.sleep(150);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -209,6 +233,19 @@ public class GUI extends JFrame{
 			}
 			repaint();
 			setStatusBar();
+		}
+	}
+	
+	public void checkGameOver() {
+		if(game.checkGameOver() && game.wasRecorded()) {
+			replayButton.setEnabled(true);
+		}
+	}
+	
+	public void checkReplay() {
+		if((game.getGameState() == GameState.REPLAY) && (game.getTurnNumber() <= game.getNumberOfMovesMade())) {
+			game.makeMove(game.getGameRecordCoordinates(game.getTurnNumber(), 0),
+				game.getGameRecordCoordinates(game.getTurnNumber(), 1), game.getGameRecordLetter(game.getTurnNumber()));
 		}
 	}
 	
@@ -247,6 +284,8 @@ public class GUI extends JFrame{
 			drawBoard(g);
 			checkComputerVsComputer();
 			checkHumanVsComputer();
+			checkGameOver();
+			checkReplay();
 		}
 		
 		private void drawGridLines(Graphics g) {			
@@ -267,6 +306,7 @@ public class GUI extends JFrame{
 			g2d.setStroke(new BasicStroke(SYMBOL_STROKE_WIDTH, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2d.setColor(Color.BLACK);
 			g2d.setFont(new Font("TimesRoman", Font.PLAIN, letterSize - letterAdjustment));
+			
 			
 			for (int row = 0; row < game.getBoardSize(); row++) {
 				for (int col = 0; col < game.getBoardSize(); col++) {					
@@ -327,6 +367,11 @@ public class GUI extends JFrame{
     		if(checkValidBoardSize(boardSizeField.getText()) == true) {
     			blueHumanButton.doClick();
     			redHumanButton.doClick();
+    			if(recordCheckBox.isSelected()) {
+    				recordCheckBox.doClick();
+    			}
+    			replayButton.setEnabled(false);
+    			
     			if(simpleGameButton.isSelected()) {
     				game = new SimpleGame(Integer.parseInt(boardSizeField.getText()));
     			}else if(generalGameButton.isSelected()) {
@@ -445,6 +490,25 @@ public class GUI extends JFrame{
     		}
     		
     		game.setBlueHumanComputerToggle(Players.BLUECOMPUTER);
+    		repaint();
+    	}
+    }
+    
+    public class RecordListener implements ActionListener{
+    	@Override
+    	public void actionPerformed(ActionEvent e) {
+    		if(recordCheckBox.isSelected()) {
+    			game.setRecord(true);
+    		}else if(!recordCheckBox.isSelected()) {
+    			game.setRecord(false);
+    		}
+    	}
+    }
+    
+    public class ReplayListener implements ActionListener{
+    	@Override
+    	public void actionPerformed(ActionEvent e) {
+    		game.setReplay(game.getBoardSize());
     		repaint();
     	}
     }

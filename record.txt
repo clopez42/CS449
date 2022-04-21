@@ -1,0 +1,51 @@
+Move1: row= 0, column= 1, letter= 'S'
+
+Move2: row= 2, column= 3, letter= 'S'
+
+Move3: row= 1, column= 3, letter= 'O'
+
+Move4: row= 4, column= 3, letter= 'S'
+
+Move5: row= 4, column= 1, letter= 'O'
+
+Move6: row= 3, column= 2, letter= 'S'
+
+Move7: row= 2, column= 4, letter= 'O'
+
+Move8: row= 1, column= 1, letter= 'O'
+
+Move9: row= 3, column= 4, letter= 'S'
+
+Move10: row= 0, column= 3, letter= 'S'
+
+Move11: row= 3, column= 0, letter= 'S'
+
+Move12: row= 0, column= 0, letter= 'O'
+
+Move13: row= 0, column= 4, letter= 'O'
+
+Move14: row= 3, column= 1, letter= 'S'
+
+Move15: row= 1, column= 0, letter= 'O'
+
+Move16: row= 2, column= 1, letter= 'S'
+
+Move17: row= 4, column= 2, letter= 'S'
+
+Move18: row= 1, column= 2, letter= 'S'
+
+Move19: row= 2, column= 2, letter= 'S'
+
+Move20: row= 0, column= 2, letter= 'O'
+
+Move21: row= 3, column= 3, letter= 'S'
+
+Move22: row= 2, column= 0, letter= 'S'
+
+Move23: row= 4, column= 4, letter= 'S'
+
+Move24: row= 1, column= 4, letter= 'S'
+
+Move25: row= 4, column= 0, letter= 'O'
+
+Blue Player Wins!!

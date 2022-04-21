@@ -11,6 +11,16 @@ public class GeneralGame extends GameEngine{
 	public void makeMove(int row, int col, char letter) {		
 		if((board[row][col] != 'S') && (board[row][col] != 'O')) {
 			board[row][col] = letter;
+			if(getGameState() == GameState.PLAYING) {
+				recordMove(row, col, letter);
+				increaseNumberOfMovesMade();
+			}
+			if(getGameState() == GameState.REPLAY) {
+				increaseTurnNumber();
+				if(getTurnNumber() == getNumberOfMovesMade()) {
+					resetTurnNumber();
+				}
+			}
 			
 			if(checkSOSFormed(row, col) == false) {
 				switchTurn();
@@ -24,6 +34,7 @@ public class GeneralGame extends GameEngine{
 				}else if(getBluePlayerScore() == getRedPlayerScore()) {
 					gameState = GameState.TIEGAME;
 				}
+				recordToFile();
 			}
 		}
 	}

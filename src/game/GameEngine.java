@@ -1,15 +1,22 @@
 package game;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Random;
 
 import game.GameEngine.Players;
 
 public class GameEngine {
-	private int[][] sosCoordinates;
+	private int[][] sosCoordinates, gameRecordCoordinates;
 	private Players[] sosMadeBy;
-	private int bluePlayerScore, redPlayerScore;
 	protected char[][] board;
+	private char[] gameRecordLetters;
+	private int bluePlayerScore, redPlayerScore, numberOfMovesMade, turnNumber;
+	private boolean record;
 	private Random rand = new Random();
+	private PrintWriter recordFile;
 	
 	public enum GameState{
 		PLAYING, BLUEWINNER, REDWINNER, TIEGAME, REPLAY
@@ -31,12 +38,23 @@ public class GameEngine {
 		board = new char[boardSize][boardSize];
 		sosCoordinates = new int[boardSize*boardSize][4];
 		sosMadeBy = new Players[boardSize*boardSize];
+		gameRecordCoordinates = new int[boardSize*boardSize][2];
+		gameRecordLetters = new char[boardSize*boardSize];
+		try {
+			recordFile = new PrintWriter("record.txt");
+		} catch (FileNotFoundException e) {
+			System.out.println("fail");
+			e.printStackTrace();
+		}
 		bluePlayerScore = 0;
 		redPlayerScore = 0;
+		numberOfMovesMade = 0;
 		
 		setBlueHumanComputerToggle(Players.BLUEHUMAN);
 		setRedHumanComputerToggle(Players.REDHUMAN);
 		playerTurn = bluePlayer;
+		
+		record = false;
 		
 		setGameState(GameState.PLAYING);
 		setPlayerTurn(bluePlayer);
@@ -80,6 +98,30 @@ public class GameEngine {
 		}
 	}
 	
+	public void recordMove(int row, int col, char letter) {
+		gameRecordCoordinates[numberOfMovesMade][0] = row;
+		gameRecordCoordinates[numberOfMovesMade][1] = col;
+		gameRecordLetters[numberOfMovesMade] = letter;
+	}
+	
+	public void recordToFile() {
+		if(wasRecorded()) {
+			for(int i=0; i<getNumberOfMovesMade(); i++) {
+				int move = i + 1;
+				recordFile.println("Move" + move + ": row= " + getGameRecordCoordinates(i,0) + ", column= " + getGameRecordCoordinates(i,1) 
+				+ ", letter= '" + getCell(getGameRecordCoordinates(i,0),getGameRecordCoordinates(i,1)) + "'\n");
+			}
+			if(getGameState() == GameState.BLUEWINNER) {
+				recordFile.println("Blue Player Wins!!");
+			}else if(getGameState() == GameState.REDWINNER) {
+				recordFile.println("Red Player Wins!!");
+			}else if(getGameState() == GameState.TIEGAME) {
+				recordFile.println("Tie Game!!");
+			}
+		}
+		recordFile.close();
+	}
+	
 	public void setPlayerTurn(Players player) {
 		playerTurn = player;
 		
@@ -103,7 +145,7 @@ public class GameEngine {
 	
 	public void setBlueHumanComputerToggle(Players mode) {
 		bluePlayer = mode;
-		if((playerTurn == Players.BLUEHUMAN) && (bluePlayer == Players.BLUECOMPUTER)) {
+		if((getPlayerTurn() == Players.BLUEHUMAN) && (getBluePlayer() == Players.BLUECOMPUTER) && (getGameState() == GameState.PLAYING)) {
 			playerTurn = bluePlayer;
 			computerAutoPlay();
 		}		
@@ -111,10 +153,26 @@ public class GameEngine {
 	
 	public void setRedHumanComputerToggle(Players mode) {
 		redPlayer = mode;
-		if((playerTurn == Players.REDHUMAN) && (redPlayer == Players.REDCOMPUTER)) {
+		if((getPlayerTurn() == Players.REDHUMAN) && (getRedPlayer() == Players.REDCOMPUTER) && (getGameState() == GameState.PLAYING)) {
 			playerTurn = redPlayer;
 			computerAutoPlay();
 		}
+	}
+	
+	public void setRecord(boolean record) {
+		this.record = record;
+	}
+	
+	public void setReplay(int boardSize) {
+		gameState = GameState.REPLAY;
+		board = new char[boardSize][boardSize];
+		sosCoordinates = new int[boardSize*boardSize][4];
+		sosMadeBy = new Players[boardSize*boardSize];
+		bluePlayerScore = 0;
+		redPlayerScore = 0;
+		setBlueHumanComputerToggle(Players.BLUECOMPUTER);
+		setRedHumanComputerToggle(Players.REDCOMPUTER);
+		setPlayerTurn(getBluePlayer());
 	}
 	
 	public GameState getGameState() {
@@ -185,6 +243,26 @@ public class GameEngine {
 		return numberOfEmptyCells;
 	}
 	
+	public int getGameRecordCoordinates(int move, int coordinate) {
+		return gameRecordCoordinates[move][coordinate];
+	}
+	
+	public char getGameRecordLetter(int move) {
+		return gameRecordLetters[move];
+	}
+	
+	public int getNumberOfMovesMade() {
+		return numberOfMovesMade;
+	}
+	
+	public int getTurnNumber() {
+		return turnNumber;
+	}
+	
+	public boolean wasRecorded() {
+		return record;
+	}
+	
 	public void increaseScore() {
 		if((getPlayerTurn() == Players.BLUEHUMAN) || (getPlayerTurn() == Players.BLUECOMPUTER)) {
 			bluePlayerScore++;
@@ -199,6 +277,18 @@ public class GameEngine {
 	
 	public void increaseRedPlayerScore() {
 		redPlayerScore++;
+	}
+	
+	public void increaseNumberOfMovesMade() {
+		numberOfMovesMade++;
+	}
+	
+	public void increaseTurnNumber() {
+		turnNumber++;
+	}
+	
+	public void resetTurnNumber() {
+		turnNumber = 0;
 	}
 	
 	public boolean checkFullAutoPlay() {
@@ -248,6 +338,14 @@ public class GameEngine {
 			return false;
 		}
 		
+	}
+	
+	public boolean checkGameOver() {
+		if(getGameState() == GameState.PLAYING) {
+			return false;
+		}else {
+			return true;
+		}
 	}
 	
 	public boolean checkSOSFormed(int row, int col) {
